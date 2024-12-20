@@ -355,7 +355,7 @@ void generateInvoice() {
     struct Booking booking;
     struct Rooms room;
     char roomNum[5];
-    int bookingFound = 0, roomFound = 0;
+    int bookingFound = 0;
 
     printf("Enter room number to generate invoice: ");
     scanf("%s", roomNum);
@@ -372,7 +372,7 @@ void generateInvoice() {
         if (strcmp(booking.roomNum, roomNum) == 0) {
             bookingFound = 1;
 
-            // Open the rooms file
+            // Open the rooms file to find the corresponding room details
             roomFile = fopen("Rooms.txt", "r");
             if (roomFile == NULL) {
                 printf("Error: Unable to open rooms file.\n");
@@ -380,7 +380,7 @@ void generateInvoice() {
                 return;
             }
 
-            // Search for room details for the given room number
+            int roomFound = 0;
             while (fread(&room, sizeof(struct Rooms), 1, roomFile)) {
                 if (strcmp(room.roomNum, roomNum) == 0) {
                     roomFound = 1;
@@ -394,6 +394,7 @@ void generateInvoice() {
                     printf("Total Days    : %d\n", booking.totalDays);
                     printf("Price per Day : %d\n", room.price);
                     printf("Total Amount  : %d\n", booking.totalDays * room.price);
+                    printf("Payment Status: %s\n", booking.paymentStatus ? "Paid" : "Pending");
                     printf("----------------------\n");
 
                     fclose(roomFile);
@@ -403,15 +404,20 @@ void generateInvoice() {
             }
 
             fclose(roomFile);
+
+            // If room details are not found
+            if (!roomFound) {
+                printf("Room details for room number %s not found in Rooms.txt.\n", roomNum);
+            }
+
+            break; // Break out of the loop after finding the booking
         }
     }
 
     fclose(bookingFile);
 
-    // Handle cases where the room or booking is not found
+    // Handle case where no booking was found
     if (!bookingFound) {
         printf("No booking found for room number %s.\n", roomNum);
-    } else if (!roomFound) {
-        printf("Room details for room number %s not found in Rooms.txt.\n", roomNum);
     }
 }
